@@ -1,12 +1,12 @@
 'use client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import api from '@/lib/api';
 import DebateCard from '@/app/components/debate/DebateCard';
 import PostList from '@/app/components/debate/PostList';
 import ArgumentComposer from '@/app/components/debate/ArgumentComposer';
 import Scoreboard from '@/app/components/debate/Scoreboard';
-import GraphView from './GraphView';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { PostRead } from '@/types/post';
 import Link from 'next/link';
@@ -17,7 +17,17 @@ import { Card } from '@/app/components/ui/Card';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProfileCard from '@/app/components/ProfileCard';
 
-export default function DashboardPage() {
+const GraphView = dynamic(() => import('./GraphView'), { 
+    ssr: false,
+    loading: () => (
+        <div className="py-20 text-center flex flex-col items-center gap-4">
+            <Loader2 className="w-8 h-8 text-brand-400 animate-spin" />
+            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Rendering combat map...</p>
+        </div>
+    )
+});
+
+function DashboardContent() {
     const queryClient = useQueryClient();
     const searchParams = useSearchParams();
     const scrollToId = searchParams.get('scrollTo');
@@ -299,5 +309,18 @@ export default function DashboardPage() {
                 )}
             </AnimatePresence>
         </div>
+    );
+}
+
+export default function DashboardPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+                <Loader2 className="w-10 h-10 text-brand-600 animate-spin" />
+                <p className="text-sm font-black uppercase tracking-[0.2em] text-zinc-400">Loading Arena...</p>
+            </div>
+        }>
+            <DashboardContent />
+        </Suspense>
     );
 }
