@@ -12,6 +12,10 @@ export interface PostRead {
     content: string;
     created_at: string;
     updated_at: string;
-    like_count: number;
+    upvotes: number;
+    downvotes: number;
+    hot_score: number;
     username?: string;
+    author_score?: number;
+    user_vote?: number | null;
 }
