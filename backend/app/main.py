@@ -29,9 +29,25 @@ async def log_requests(request: Request, call_next):
     logger.info(f"Method: {request.method} Path: {request.url.path} Status: {response.status_code} Time: {formatted_process_time}")
     return response
 
+from sqlmodel import Session, select
+from app.models.debate import DebateTopic, DebateStatus
+from app.core.database import engine, create_db_and_tables
+
 @app.on_event("startup")
 def on_startup():
     create_db_and_tables()
+    
+    # 활성 토론 주제가 있는지 확인
+    with Session(engine) as session:
+        active_topic = session.exec(
+            select(DebateTopic).where(DebateTopic.status == DebateStatus.ACTIVE)
+        ).first()
+        
+        if not active_topic:
+            logger.info("No active debate topic found. Generating one...")
+            update_daily_debate()
+        else:
+            logger.info(f"Active debate topic found: {active_topic.title}")
 
 # CORS 설정
 origins = []
