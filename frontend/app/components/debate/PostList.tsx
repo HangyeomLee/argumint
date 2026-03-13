@@ -24,7 +24,7 @@ export default function PostList({ posts, onVote, onReply, isSubmitting }: PostL
         
         // Sort by net votes (upvotes - downvotes)
         const sortedPosts = [...currentPosts].sort((a, b) => 
-            (b.upvotes - b.downvotes) - (a.upvotes - a.downvotes)
+            ((b.upvotes || 0) - (b.downvotes || 0)) - ((a.upvotes || 0) - (a.downvotes || 0))
         );
 
         return sortedPosts.map(post => (

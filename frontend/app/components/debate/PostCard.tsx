@@ -16,9 +16,9 @@ interface PostCardProps {
 
 export default function PostCard({ post, onVote, onReply, isRebuttal = false }: PostCardProps) {
     const isPro = post.side === 'PRO';
-    // Use fallback values to satisfy TypeScript
-    const upvotes = post.upvotes || 0;
-    const downvotes = post.downvotes || 0;
+    // Ensure upvotes and downvotes exist to satisfy TypeScript and runtime
+    const upvotes = (post as any).upvotes || 0;
+    const downvotes = (post as any).downvotes || 0;
     const score = upvotes - downvotes;
     const tier = getTier(post.author_score || 0);
     
