@@ -6,7 +6,8 @@ export function useWebSocket(debateId: number | undefined, onEvent: (event: any)
     useEffect(() => {
         if (!debateId) return;
 
-        const ws = new WebSocket(`ws://localhost:8000/ws/debates/${debateId}`);
+        const wsBaseUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws';
+        const ws = new WebSocket(`${wsBaseUrl}/debates/${debateId}`);
         socket.current = ws;
 
         ws.onmessage = (event) => {
