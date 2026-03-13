@@ -2,7 +2,7 @@
 import { PostRead } from '@/types/post';
 import { Card } from '@/app/components/ui/Card';
 import { Badge } from '@/app/components/ui/Badge';
-import { ChevronUp, ChevronDown, MessageCircle, Clock } from 'lucide-react';
+import { ChevronUp, ChevronDown, MessageCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { getTier } from '@/lib/tiers';
 import TierIcon from '../TierIcon';
@@ -16,7 +16,10 @@ interface PostCardProps {
 
 export default function PostCard({ post, onVote, onReply, isRebuttal = false }: PostCardProps) {
     const isPro = post.side === 'PRO';
-    const score = (post.upvotes || 0) - (post.downvotes || 0);
+    // Use fallback values to satisfy TypeScript
+    const upvotes = post.upvotes || 0;
+    const downvotes = post.downvotes || 0;
+    const score = upvotes - downvotes;
     const tier = getTier(post.author_score || 0);
     
     return (
@@ -50,7 +53,6 @@ export default function PostCard({ post, onVote, onReply, isRebuttal = false }: 
             >
                 <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">
-                        {/* Author Tier Icon */}
                         <div className="scale-75 -ml-1">
                             <TierIcon tier={tier} size="sm" />
                         </div>
