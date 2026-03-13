@@ -151,7 +151,7 @@ export default function DashboardPage() {
                     if (oldVote === -1) downDiff--;
                     if (newVote === 1) upDiff++;
                     if (newVote === -1) downDiff++;
-                    return { ...p, user_vote: newVote, upvotes: p.upvotes + upDiff, downvotes: p.downvotes + downDiff };
+                    return { ...p, user_vote: newVote, upvotes: (p.upvotes || 0) + upDiff, downvotes: (p.downvotes || 0) + downDiff };
                 }
                 return p;
             }));

@@ -17,7 +17,7 @@ export default function GraphView({ posts }: GraphViewProps) {
     const { nodes, edges } = useMemo(() => {
         const nodes: Node[] = posts.map((post, index) => {
             const isPro = post.side === 'PRO';
-            const score = post.upvotes - post.downvotes;
+            const score = (post.upvotes || 0) - (post.downvotes || 0);
             return {
                 id: post.id.toString(),
                 data: { label: post.title || (post.content.length > 50 ? post.content.substring(0, 50) + '...' : post.content) },

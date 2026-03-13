@@ -16,7 +16,7 @@ interface PostCardProps {
 
 export default function PostCard({ post, onVote, onReply, isRebuttal = false }: PostCardProps) {
     const isPro = post.side === 'PRO';
-    const score = post.upvotes - post.downvotes;
+    const score = (post.upvotes || 0) - (post.downvotes || 0);
     const tier = getTier(post.author_score || 0);
     
     return (
