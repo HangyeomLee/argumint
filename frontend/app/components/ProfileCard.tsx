@@ -5,7 +5,12 @@ import { Card } from './ui/Card';
 import { getTier } from '@/lib/tiers';
 import TierIcon from './TierIcon';
 
+/**
+ * Displays a user's profile card, including their username, current tier, reputation score, and points to the next goal.
+ * It fetches the current user's data and displays it dynamically.
+ */
 export default function ProfileCard() {
+    // Fetches the current user's profile data.
     const { data: user, isLoading } = useQuery({
         queryKey: ['me'],
         queryFn: async () => {
@@ -14,6 +19,7 @@ export default function ProfileCard() {
         }
     });
 
+    // Display a loading skeleton while user data is being fetched or if user data is not available.
     if (isLoading || !user) return (
         <Card className="p-6 animate-pulse bg-zinc-50 dark:bg-zinc-900 border-none">
             <div className="flex items-center gap-4 mb-4">
@@ -26,6 +32,7 @@ export default function ProfileCard() {
         </Card>
     );
 
+    // Determine the user's current tier based on their total score.
     const tier = getTier(user.total_score);
 
     return (
@@ -45,10 +52,12 @@ export default function ProfileCard() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
+                {/* User's Reputation Score */}
                 <div className="p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-700 shadow-sm text-center">
                     <div className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-1">Reputation</div>
                     <div className="text-xl font-black text-brand-600 tabular-nums leading-none">{user.total_score}</div>
                 </div>
+                {/* User's Goal (points to next tier) */}
                 <div className="p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-700 shadow-sm text-center">
                     <div className="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-1">Goal</div>
                     <div className="text-xl font-black text-zinc-900 dark:text-white tabular-nums leading-none">

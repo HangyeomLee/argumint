@@ -5,6 +5,10 @@ import { Trophy, Star, TrendingUp, Shield, MessageCircle, Zap } from 'lucide-rea
 import { TIERS } from '@/lib/tiers';
 import TierIcon from '@/app/components/TierIcon';
 
+/**
+ * Renders the Rules page, outlining the scoring system and user evolution tiers within the Argumint Arena.
+ * It explains how users earn reputation and progress through different ranks.
+ */
 export default function RulesPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 sm:py-20">
@@ -21,7 +25,7 @@ export default function RulesPage() {
       </div>
 
       <div className="grid gap-20">
-        {/* Reputation System */}
+        {/* Reputation System: Explains how users gain and lose reputation points. */}
         <section>
           <div className="flex items-center gap-3 mb-8">
             <div className="p-2 bg-brand-600 rounded-xl shadow-lg shadow-brand-500/20">

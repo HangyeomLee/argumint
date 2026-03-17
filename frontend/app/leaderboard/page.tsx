@@ -3,10 +3,15 @@ import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { Card } from '@/app/components/ui/Card';
 import { Badge } from '@/app/components/ui/Badge';
-import { Trophy, Award, Star, Loader2, User } from 'lucide-react';
+import { Trophy, Loader2 } from 'lucide-react';
 import { getTier } from '@/lib/tiers';
 
+/**
+ * Renders the Leaderboard page, displaying a list of users ranked by their total score.
+ * Shows top users with distinct styling and dynamically calculates user tiers.
+ */
 export default function LeaderboardPage() {
+    // Fetches the global leaderboard data from the API.
     const { data: users, isLoading } = useQuery({
         queryKey: ['leaderboard'],
         queryFn: async () => {
@@ -15,6 +20,7 @@ export default function LeaderboardPage() {
         }
     });
 
+    // Display a loading spinner while leaderboard data is being fetched.
     if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
@@ -42,34 +48,39 @@ export default function LeaderboardPage() {
                 {users?.map((user: any, index: number) => {
                     const isTop3 = index < 3;
                     const tier = getTier(user.total_score);
-                    const TierIcon = tier.icon;
+                    const TierIcon = tier.icon; // Assuming tier object has an icon component
                     
                     return (
                         <Card 
                             key={user.id} 
                             hover 
                             className={`flex items-center justify-between transition-all duration-300 ${
+                                // Apply distinct styling for top 3 users
                                 isTop3 ? 'border-brand-200 bg-white dark:bg-brand-900/5 py-6' : 'py-4 border-zinc-100 dark:border-zinc-800'
                             }`}
                         >
                             <div className="flex items-center gap-6">
+                                {/* Rank display with special styling for top 3 */}
                                 <div className={`w-12 h-12 flex items-center justify-center rounded-xl font-black text-xl italic ${
-                                    index === 0 ? 'bg-amber-100 text-amber-600 shadow-md shadow-amber-500/20' : 
-                                    index === 1 ? 'bg-slate-100 text-slate-600' : 
-                                    index === 2 ? 'bg-orange-100 text-orange-700' : 
-                                    'text-zinc-400'
+                                    index === 0 ? 'bg-amber-100 text-amber-600 shadow-md shadow-amber-500/20' : // Gold for 1st
+                                    index === 1 ? 'bg-slate-100 text-slate-600' : // Silver for 2nd
+                                    index === 2 ? 'bg-orange-100 text-orange-700' : // Bronze for 3rd
+                                    'text-zinc-400' // Default for others
                                 }`}>
                                     {index + 1}
                                 </div>
                                 
                                 <div className="flex items-center gap-4">
+                                    {/* User's tier icon */}
                                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${tier.bg} ${tier.color}`}>
                                         <TierIcon className="w-6 h-6" />
                                     </div>
                                     <div>
+                                        {/* User's username */}
                                         <div className="text-lg font-black tracking-tight text-zinc-900 dark:text-white uppercase leading-none mb-1">
                                             {user.username}
                                         </div>
+                                        {/* User's tier name */}
                                         <div className={`text-[8px] font-black uppercase tracking-widest ${tier.color}`}>
                                             {tier.name}
                                         </div>
@@ -78,6 +89,7 @@ export default function LeaderboardPage() {
                             </div>
 
                             <div className="text-right">
+                                {/* User's total score */}
                                 <div className="text-2xl font-black text-brand-600 dark:text-brand-400 tabular-nums leading-none mb-1">
                                     {user.total_score.toLocaleString()}
                                 </div>
@@ -89,6 +101,7 @@ export default function LeaderboardPage() {
                     );
                 })}
 
+                {/* Message displayed if no users are found or data is empty. */}
                 {(!users || users.length === 0) && (
                     <div className="py-20 text-center text-zinc-400 font-bold uppercase tracking-widest italic">
                         The rankings are being calculated...

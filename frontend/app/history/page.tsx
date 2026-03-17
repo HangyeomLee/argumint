@@ -8,7 +8,12 @@ import { Button } from '@/app/components/ui/Button';
 import { History, Calendar, ExternalLink, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 
+/**
+ * Renders the History page, displaying a list of concluded debates.
+ * Users can browse past debates and explore their archives.
+ */
 export default function HistoryPage() {
+    // Fetches the history of past debates from the API.
     const { data: debates, isLoading } = useQuery({
         queryKey: ['debateHistory'],
         queryFn: async () => {
@@ -17,6 +22,7 @@ export default function HistoryPage() {
         }
     });
 
+    // Display a loading spinner while debate history is being fetched.
     if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
@@ -39,6 +45,7 @@ export default function HistoryPage() {
             </div>
             
             <div className="grid gap-6">
+                {/* Display a message if no debates are found in the history. */}
                 {!debates || debates.length === 0 ? (
                     <div className="bg-zinc-100/50 dark:bg-zinc-900/50 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl p-20 text-center">
                         <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">The archives are empty. Daily battles are yet to be archived.</p>
@@ -49,6 +56,7 @@ export default function HistoryPage() {
                             <div className="flex justify-between items-start mb-6">
                                 <div className="flex items-center gap-1.5 text-zinc-400 text-[10px] font-black uppercase tracking-widest">
                                     <Calendar className="w-3.5 h-3.5" />
+                                    {/* Format the debate end time for display. */}
                                     Concluded {format(new Date(debate.end_time), 'MMMM d, yyyy')}
                                 </div>
                                 <Badge variant="neutral">Archived</Badge>
@@ -64,10 +72,12 @@ export default function HistoryPage() {
                             <div className="flex justify-between items-center pt-6 border-t border-zinc-100 dark:border-zinc-800">
                                 <div className="flex gap-4">
                                     <div className="text-center">
+                                        {/* Placeholder for actual post count */}
                                         <div className="text-lg font-black text-zinc-900 dark:text-white leading-none mb-0.5 italic">128</div>
                                         <div className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">Posts</div>
                                     </div>
                                     <div className="text-center">
+                                        {/* Placeholder for actual like count */}
                                         <div className="text-lg font-black text-zinc-900 dark:text-white leading-none mb-0.5 italic">512</div>
                                         <div className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">Likes</div>
                                     </div>

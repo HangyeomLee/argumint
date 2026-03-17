@@ -6,18 +6,27 @@ import { useEffect, useState } from 'react';
 import { Sword, Trophy, History, LayoutDashboard, Star } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 
+/**
+ * Renders the main navigation bar for the application.
+ * It displays navigation links, authentication status, and user actions.
+ * The navbar is hidden on authentication pages (login, register).
+ */
 export default function Navbar() {
   const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
+    // Check for authentication token in local storage to determine user login status.
     const token = localStorage.getItem('token');
     setIsLoggedIn(!!token);
-  }, [pathname]);
+  }, [pathname]); // Re-check on route change.
 
+  /**
+   * Handles user logout by removing the token and redirecting to the homepage.
+   */
   const handleLogout = () => {
     localStorage.removeItem('token');
-    window.location.href = '/';
+    window.location.href = '/'; // Force a full page reload to reset state.
   };
 
   const isAuthPage = pathname === '/login' || pathname === '/register';
@@ -36,6 +45,7 @@ export default function Navbar() {
             </span>
           </Link>
 
+          {/* Primary navigation links for desktop */}
           <div className="hidden md:flex items-center gap-1">
             <NavLink href="/dashboard" icon={<LayoutDashboard className="w-4 h-4" />} active={pathname === '/dashboard'}>
               Arena
@@ -77,14 +87,23 @@ export default function Navbar() {
   );
 }
 
+/**
+ * A reusable link component for the navbar.
+ * Displays an icon and text, with a distinct style for the active link.
+ * @param {object} props - The component props.
+ * @param {string} props.href - The URL to link to.
+ * @param {React.ReactNode} props.children - The text content of the link.
+ * @param {React.ReactNode} props.icon - The icon to display next to the text.
+ * @param {boolean} [props.active] - Whether the link is currently active.
+ */
 function NavLink({ href, children, icon, active }: { href: string; children: React.ReactNode; icon: React.ReactNode; active?: boolean }) {
   return (
     <Link 
       href={href} 
       className={`flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
         active 
-          ? 'bg-brand-50 text-brand-700' 
-          : 'text-zinc-500 hover:text-brand-600 hover:bg-brand-50/50'
+          ? 'bg-brand-50 text-brand-700' // Active state style
+          : 'text-zinc-500 hover:text-brand-600 hover:bg-brand-50/50' // Default state style
       }`}
     >
       {icon}

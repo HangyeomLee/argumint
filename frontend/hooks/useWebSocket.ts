@@ -1,5 +1,13 @@
 import { useEffect, useRef } from 'react';
 
+/**
+ * Custom hook to manage a WebSocket connection for a debate.
+ * It handles connecting, receiving messages, and automatically reconnecting on disconnection.
+ *
+ * @param debateId The ID of the debate to connect to. The connection is only established if the ID is provided.
+ * @param onEvent Callback function that is triggered when a message is received from the WebSocket.
+ * @returns The WebSocket instance, or null if not connected.
+ */
 export function useWebSocket(debateId: number | undefined, onEvent: (event: any) => void) {
     const socket = useRef<WebSocket | null>(null);
     const reconnectTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -16,6 +24,7 @@ export function useWebSocket(debateId: number | undefined, onEvent: (event: any)
 
         ws.onopen = () => {
             console.log('WebSocket Connected');
+            // Clear any existing reconnect timeout upon successful connection
             if (reconnectTimeout.current) {
                 clearTimeout(reconnectTimeout.current);
                 reconnectTimeout.current = null;
@@ -33,7 +42,7 @@ export function useWebSocket(debateId: number | undefined, onEvent: (event: any)
 
         ws.onclose = () => {
             console.log('WebSocket Disconnected. Attempting to reconnect...');
-            // 3초 후 재연결 시도
+            // Attempt to reconnect after 3 seconds
             reconnectTimeout.current = setTimeout(() => {
                 connect();
             }, 3000);
@@ -41,6 +50,7 @@ export function useWebSocket(debateId: number | undefined, onEvent: (event: any)
 
         ws.onerror = (error) => {
             console.error('WebSocket Error:', error);
+            // Closing the socket will trigger the onclose event, which handles reconnection.
             ws.close();
         };
     };
@@ -48,8 +58,11 @@ export function useWebSocket(debateId: number | undefined, onEvent: (event: any)
     useEffect(() => {
         connect();
 
+        // Cleanup function to close the WebSocket connection when the component unmounts
         return () => {
             if (socket.current) {
+                // Prevent onclose from triggering reconnection during cleanup
+                socket.current.onclose = null; 
                 socket.current.close();
             }
             if (reconnectTimeout.current) {

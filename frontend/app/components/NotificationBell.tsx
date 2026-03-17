@@ -8,32 +8,43 @@ import { Card } from './ui/Card';
 import { formatDistanceToNow } from 'date-fns';
 import { useRouter, usePathname } from 'next/navigation';
 
+/**
+ * Renders a notification bell icon that displays a dropdown with user notifications.
+ * It fetches notifications, shows an unread count, and allows users to mark notifications as read.
+ */
 export default function NotificationBell() {
     const [isOpen, setIsOpen] = useState(false);
     const queryClient = useQueryClient();
     const router = useRouter();
     const pathname = usePathname();
 
+    // Fetch user notifications from the server. Refetches every 10 seconds.
     const { data: notifications } = useQuery({
         queryKey: ['notifications'],
         queryFn: async () => {
             const res = await api.get('/users/notifications');
             return res.data;
         },
-        refetchInterval: 10000 
+        refetchInterval: 10000 // Poll for new notifications every 10 seconds
     });
 
     const unreadCount = notifications?.filter((n: any) => !n.is_read).length || 0;
 
+    // Mutation to mark all notifications as read on the server.
     const markReadMutation = useMutation({
         mutationFn: async () => {
             return api.post('/users/notifications/read');
         },
         onSuccess: () => {
+            // After successfully marking as read, invalidate the notifications query to refetch data.
             queryClient.invalidateQueries({ queryKey: ['notifications'] });
         }
     });
 
+    /**
+     * Toggles the notification dropdown's visibility.
+     * If opening the dropdown with unread notifications, it triggers the mutation to mark them as read.
+     */
     const handleToggle = () => {
         if (!isOpen && unreadCount > 0) {
             markReadMutation.mutate();
@@ -41,6 +52,12 @@ export default function NotificationBell() {
         setIsOpen(!isOpen);
     };
 
+    /**
+     * Handles clicking on a notification.
+     * It closes the dropdown and navigates the user to the relevant post.
+     * If already on the dashboard, it scrolls to the post and highlights it.
+     * @param {number} postId - The ID of the post associated with the notification.
+     */
     const handleNotificationClick = (postId: number) => {
         setIsOpen(false);
         if (pathname !== '/dashboard') {
@@ -49,7 +66,7 @@ export default function NotificationBell() {
             const element = document.getElementById(`post-${postId}`);
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                // Add a temporary highlight ring
+                // Add a temporary highlight ring for user feedback.
                 element.classList.add('ring-2', 'ring-brand-500', 'ring-offset-4', 'dark:ring-offset-zinc-950', 'transition-all');
                 setTimeout(() => {
                     element.classList.remove('ring-2', 'ring-brand-500', 'ring-offset-4', 'dark:ring-offset-zinc-950');
@@ -63,27 +80,32 @@ export default function NotificationBell() {
             <button 
                 onClick={handleToggle}
                 className="p-2 text-zinc-500 hover:text-brand-600 transition-colors relative"
+                aria-label={unreadCount > 0 ? `${unreadCount} unread notifications` : 'No new notifications'}
             >
                 <Bell className="w-5 h-5" />
                 {unreadCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white dark:border-zinc-950"></span>
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white dark:border-zinc-950" aria-hidden="true"></span>
                 )}
             </button>
 
             <AnimatePresence>
                 {isOpen && (
                     <>
+                        {/* Backdrop to close the dropdown when clicking outside */}
                         <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
                         <motion.div 
                             initial={{ opacity: 0, y: 10, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
                             className="absolute right-0 mt-2 w-80 z-50 origin-top-right"
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="notification-header"
                         >
                             <Card className="p-0 shadow-premium border-brand-100 overflow-hidden">
                                 <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center">
-                                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-white">Alerts</h4>
-                                    <span className="text-[8px] font-bold text-zinc-400 uppercase">{unreadCount} New</span>
+                                    <h4 id="notification-header" className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-900 dark:text-white">Alerts</h4>
+                                    {unreadCount > 0 && <span className="text-[8px] font-bold text-zinc-400 uppercase">{unreadCount} New</span>}
                                 </div>
                                 <div className="max-h-96 overflow-y-auto">
                                     {!notifications || notifications.length === 0 ? (
