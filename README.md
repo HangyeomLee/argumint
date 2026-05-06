@@ -19,6 +19,22 @@ A polished, real-time daily debate platform built with FastAPI and Next.js.
 - **Visualizations**: Switch between a traditional threaded feed and an interactive graph view using React Flow.
 - **Leaderboard**: Global rankings based on cumulative performance.
 
+## Screenshots
+
+### Landing Page
+
+![Argumint landing page](docs/screenshots/argumint-home.png)
+
+### Product Surfaces
+
+| Rules | Login |
+| --- | --- |
+| ![Argumint rules page](docs/screenshots/argumint-rules.png) | ![Argumint login page](docs/screenshots/argumint-login.png) |
+
+### Onboarding
+
+![Argumint register page](docs/screenshots/argumint-register.png)
+
 ## Getting Started
 
 ### Prerequisites
