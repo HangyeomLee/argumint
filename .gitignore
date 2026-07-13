@@ -38,3 +38,6 @@ Thumbs.db
 .gemini/
 .cursor/
 .vscode/
+
+# TypeScript build info
+*.tsbuildinfo
