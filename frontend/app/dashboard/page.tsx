@@ -10,7 +10,7 @@ import Scoreboard from '@/app/components/debate/Scoreboard';
 import { useDebateRealtime } from '@/hooks/useDebateRealtime';
 import { PostRead } from '@/types/post';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { LayoutDashboard, BarChart3, MessageSquare, Loader2, Plus, X, Activity, Trophy, TrendingUp } from 'lucide-react';
 import { Button } from '@/app/components/ui/Button';
 import { Card } from '@/app/components/ui/Card';
@@ -35,6 +35,7 @@ const GraphView = dynamic(() => import('./GraphView'), {
 function DashboardContent() {
     const queryClient = useQueryClient();
     const searchParams = useSearchParams();
+    const router = useRouter();
     // Get a post ID from URL parameters for scrolling into view (e.g., from a notification click).
     const scrollToId = searchParams.get('scrollTo');
     // Optional debate ID for browsing an archived battle (from the History page).
@@ -208,6 +209,11 @@ function DashboardContent() {
             // Invalidate queries to refetch leaderboard and user's own data after voting.
             queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
             queryClient.invalidateQueries({ queryKey: ['me'] });
+        },
+        onError: (err: any) => {
+            // Roll back the optimistic update by refetching the real state.
+            queryClient.invalidateQueries({ queryKey: ['posts'] });
+            if (err?.response?.status === 401) router.push('/login');
         }
     });
 
@@ -222,6 +228,10 @@ function DashboardContent() {
             // Invalidate participation query to reflect the user's new side.
             queryClient.invalidateQueries({ queryKey: ['participation'] });
             queryClient.invalidateQueries({ queryKey: ['me'] }); // Also refetch user data (might affect profile card)
+        },
+        onError: (err: any) => {
+            // Not signed in: joining silently failed before — send to login instead.
+            if (err?.response?.status === 401) router.push('/login');
         }
     });
 

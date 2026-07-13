@@ -18,7 +18,14 @@ export default function RegisterPage() {
         return api.post('/auth/register', data);
     },
     onSuccess: (response) => {
-        router.push('/login');
+        // Registration returns a session token — go straight to the arena.
+        const token = response.data?.access_token;
+        if (token) {
+            localStorage.setItem('token', token);
+            router.push('/dashboard');
+        } else {
+            router.push('/login');
+        }
     },
     onError: (err: any) => {
         setError(err.response?.data?.detail || 'Registration failed');

@@ -52,11 +52,16 @@ export async function POST(req: NextRequest) {
     return apiError(400, 'The user with this username already exists in the system');
   }
 
+  // Sign in right away so the client can skip the login page.
+  const { data: signIn } = await supabaseAdmin.auth.signInWithPassword({ email, password });
+
   return NextResponse.json({
     id: profile.id,
     username: profile.username,
     email,
     total_score: profile.total_score,
     created_at: profile.created_at,
+    access_token: signIn?.session?.access_token ?? null,
+    token_type: 'bearer',
   });
 }
