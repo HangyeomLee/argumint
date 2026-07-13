@@ -1,7 +1,9 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
 import api from '@/lib/api';
 import { Card } from './ui/Card';
+import { Button } from './ui/Button';
 import { getTier } from '@/lib/tiers';
 import TierIcon from './TierIcon';
 
@@ -11,13 +13,29 @@ import TierIcon from './TierIcon';
  */
 export default function ProfileCard() {
     // Fetches the current user's profile data.
-    const { data: user, isLoading } = useQuery({
+    const { data: user, isLoading, isError } = useQuery({
         queryKey: ['me'],
         queryFn: async () => {
             const res = await api.get('/users/me');
             return res.data;
-        }
+        },
+        retry: false
     });
+
+    // Not signed in (or session expired): prompt to log in instead of an endless skeleton.
+    if (isError) return (
+        <Card className="p-6 border-none shadow-premium bg-white dark:bg-zinc-900 text-center">
+            <h3 className="text-sm font-black uppercase tracking-tight text-zinc-900 dark:text-white mb-2">
+                Join the Battle
+            </h3>
+            <p className="text-[11px] font-medium text-zinc-500 mb-4">
+                Sign in to pick a side, post arguments and earn reputation.
+            </p>
+            <Link href="/login">
+                <Button size="sm" className="w-full h-10 rounded-xl">Sign In</Button>
+            </Link>
+        </Card>
+    );
 
     // Display a loading skeleton while user data is being fetched or if user data is not available.
     if (isLoading || !user) return (

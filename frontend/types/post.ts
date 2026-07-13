@@ -4,7 +4,7 @@ export type PostType = 'argument' | 'rebuttal';
 export interface PostRead {
     id: number;
     topic_id: number;
-    user_id: number;
+    user_id: string; // Supabase auth UUID
     parent_post_id: number | null;
     side: PostSide;
     type: PostType;

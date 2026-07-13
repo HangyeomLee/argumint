@@ -7,7 +7,7 @@ import DebateCard from '@/app/components/debate/DebateCard';
 import PostList from '@/app/components/debate/PostList';
 import ArgumentComposer from '@/app/components/debate/ArgumentComposer';
 import Scoreboard from '@/app/components/debate/Scoreboard';
-import { useWebSocket } from '@/hooks/useWebSocket';
+import { useDebateRealtime } from '@/hooks/useDebateRealtime';
 import { PostRead } from '@/types/post';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -37,6 +37,8 @@ function DashboardContent() {
     const searchParams = useSearchParams();
     // Get a post ID from URL parameters for scrolling into view (e.g., from a notification click).
     const scrollToId = searchParams.get('scrollTo');
+    // Optional debate ID for browsing an archived battle (from the History page).
+    const archiveId = searchParams.get('debate');
     
     // State to hold the list of posts in the current debate.
     const [posts, setPosts] = useState<PostRead[]>([]);
@@ -51,14 +53,16 @@ function DashboardContent() {
     // State to store recent live activities in the debate.
     const [activities, setActivities] = useState<any[]>([]);
 
-    // Fetches the currently active debate details.
+    // Fetches the currently active debate, or a specific archived one when
+    // arriving from the History page (?debate=<id>).
     const { data: debate, isLoading: isDebateLoading } = useQuery({
-        queryKey: ['activeDebate'],
+        queryKey: ['activeDebate', archiveId],
         queryFn: async () => {
-            const res = await api.get('/debates/active');
+            const res = await api.get(archiveId ? `/debates/${archiveId}` : '/debates/active');
             return res.data;
         }
     });
+    const isArchived = !!debate && debate.status !== 'active';
 
     // Fetches the current user's participation status in the active debate.
     const { data: participation } = useQuery({
@@ -158,8 +162,8 @@ function DashboardContent() {
         }
     }, [queryClient]);
 
-    // Establish WebSocket connection for real-time updates.
-    useWebSocket(debate?.id, onWebSocketEvent);
+    // Subscribe to Supabase Realtime for live updates.
+    useDebateRealtime(debate?.id, onWebSocketEvent);
 
     // Mutation for submitting new arguments or rebuttals.
     const postMutation = useMutation({
@@ -254,11 +258,11 @@ function DashboardContent() {
                     
                     {/* Main debate content area (Debate Card, Scoreboard, Posts/Graph View) */}
                     <div className="lg:col-span-8">
-                        <DebateCard debate={debate} onJoin={(side) => joinMutation.mutate(side)} currentSide={participation?.side} />
+                        <DebateCard debate={debate} onJoin={(side) => joinMutation.mutate(side)} currentSide={participation?.side} archived={isArchived} />
                         <Scoreboard proScore={scoreboard.pro_score} conScore={scoreboard.con_score} proCount={scoreboard.pro_count} conCount={scoreboard.con_count} endTime={debate?.end_time} />
 
-                        {/* Render argument composer and post list/graph only if user has joined the debate */}
-                        {participation && (
+                        {/* Posts are visible to participants, and read-only for archived debates */}
+                        {(participation || isArchived) && (
                             <div className="mt-8">
                                 <div className="flex items-center justify-between mb-8 border-b border-zinc-100 dark:border-zinc-800 pb-4">
                                     {/* View toggle buttons (Feed/Graph) */}
@@ -270,10 +274,12 @@ function DashboardContent() {
                                             <BarChart3 className="w-3.5 h-3.5" /> Graph
                                         </button>
                                     </div>
-                                    {/* Button to open argument composer */}
-                                    <Button size="sm" onClick={() => setIsComposerOpen(true)} className="h-10 rounded-xl px-4 gap-2">
-                                        <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Post Argument</span>
-                                    </Button>
+                                    {/* Button to open argument composer (hidden for archived debates) */}
+                                    {!isArchived && (
+                                        <Button size="sm" onClick={() => setIsComposerOpen(true)} className="h-10 rounded-xl px-4 gap-2">
+                                            <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Post Argument</span>
+                                        </Button>
+                                    )}
                                 </div>
 
                                 {/* Conditional rendering for post list or graph view */}

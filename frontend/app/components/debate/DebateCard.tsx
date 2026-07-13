@@ -27,17 +27,21 @@ interface DebateCardProps {
     onJoin: (side: 'PRO' | 'CON') => void;
     /** The side the current user has joined, if any. */
     currentSide?: 'PRO' | 'CON';
+    /** When true the debate is closed and joining is disabled. */
+    archived?: boolean;
 }
 
 /**
  * Displays a card with a debate topic, its description, and options to join a side.
  * If the user has already joined a side, it shows their current affiliation.
  */
-export default function DebateCard({ debate, onJoin, currentSide }: DebateCardProps) {
+export default function DebateCard({ debate, onJoin, currentSide, archived = false }: DebateCardProps) {
     return (
         <div className="mb-12">
             <div className="flex flex-wrap items-center gap-3 mb-4">
-                <Badge variant="primary" className="text-[10px]">Active Battle</Badge>
+                <Badge variant={archived ? 'neutral' : 'primary'} className="text-[10px]">
+                    {archived ? 'Archived Battle' : 'Active Battle'}
+                </Badge>
                 <div className="flex items-center gap-1 text-zinc-400 text-[10px] font-black uppercase tracking-widest">
                     <Calendar className="w-3 h-3" />
                     {/* Format the debate start time for display. */}
@@ -54,11 +58,16 @@ export default function DebateCard({ debate, onJoin, currentSide }: DebateCardPr
             </p>
             
             <div className="flex flex-wrap items-center gap-4">
-                {/* Conditionally render join buttons or current side display */}
-                {!currentSide ? (
+                {/* Archived debates are read-only; otherwise show join buttons or the joined side. */}
+                {archived ? (
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                            This battle has concluded
+                        </span>
+                    </div>
+                ) : !currentSide ? (
                     <div className="flex flex-wrap gap-3">
-                        {/* Button to join the 'PRO' side */}
-                        <Button 
+                        <Button
                             variant="support"
                             size="sm"
                             onClick={() => onJoin('PRO')}
@@ -66,8 +75,7 @@ export default function DebateCard({ debate, onJoin, currentSide }: DebateCardPr
                         >
                             🛡️ Support
                         </Button>
-                        {/* Button to join the 'CON' side */}
-                        <Button 
+                        <Button
                             variant="oppose"
                             size="sm"
                             onClick={() => onJoin('CON')}
@@ -77,7 +85,6 @@ export default function DebateCard({ debate, onJoin, currentSide }: DebateCardPr
                         </Button>
                     </div>
                 ) : (
-                    {/* Display current joined side */}
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
                         <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Your Side:</span>
                         <Badge variant={currentSide === 'PRO' ? 'support' : 'oppose'} className="text-xs">
